@@ -1,5 +1,6 @@
 package slab;
 
+import org.agrona.DirectBuffer;
 import org.agrona.MutableDirectBuffer;
 import org.agrona.concurrent.UnsafeBuffer;
 
@@ -15,6 +16,11 @@ public class TestOrder implements Codec {
     @Override
     public void wrap(final MutableDirectBuffer buffer, final int offset, final int length) {
         this.buffer.wrap(buffer, offset, length);
+    }
+
+    @Override
+    public DirectBuffer buffer() {
+        return buffer;
     }
 
 

@@ -12,6 +12,7 @@ public class Cursor<T extends Codec> {
     private final Runnable pageGenerator;
 
     private int nextPageIndex = 0;
+    private int currPageIndex;
     public final int pageElementCount;
 
     public Cursor(final int pageElementCount, final IntArrayQueue cleanPageIndices,
@@ -22,6 +23,7 @@ public class Cursor<T extends Codec> {
         this.pages = pages;
         final int currIndex = cleanPageIndices.pollInt();
         this.currentPage = pages[currIndex];
+        this.currPageIndex = currentPage.getPageIndex() * pageElementCount;
     }
 
     protected void setPages(final SlabPage<T>[] pages) {
@@ -37,11 +39,12 @@ public class Cursor<T extends Codec> {
         }
         final int newIndex = cleanPageIndices.pollInt();
         this.currentPage = pages[newIndex];
+        this.currPageIndex = currentPage.getPageIndex() *  pageElementCount;
         nextPageIndex = 0;
     }
 
     public int getCursorIndex() {
-        return (currentPage.getPageIndex() * pageElementCount) + nextPageIndex;
+        return currPageIndex + nextPageIndex;
     }
 
     public void wrapAtCursor(final T codec) {

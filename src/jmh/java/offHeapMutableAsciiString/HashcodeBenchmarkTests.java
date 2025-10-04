@@ -9,15 +9,15 @@ import java.util.concurrent.TimeUnit;
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @Fork(1)
-@Warmup(iterations = 2, time = 500, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 5, time = 500, timeUnit = TimeUnit.MILLISECONDS)
+@Warmup(iterations = 2, time = 2, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 5, time = 2, timeUnit = TimeUnit.SECONDS)
 public class HashcodeBenchmarkTests {
     final UnsafeAsciiString unsafeAsciiString1 = new UnsafeAsciiString(40);
 
     final MemorySegmentAsciiString segment1 = new  MemorySegmentAsciiString(40);
 
     String string1 = null;
-    private String stringBase = "ABCDEFGHIJKLMNOPQRSTUVQXYZ";
+    private final String stringBase = "ABCDEFGHIJKLMNOPQRSTUVQXYZ";
     int i = 0;
 
     final UnsafeByteString unsafeByteString1 = new UnsafeByteString(40);
@@ -31,6 +31,7 @@ public class HashcodeBenchmarkTests {
         unsafeByteString1.set("ABCDEFGHIJKLMNOPQRSTUVQXYZ1234567891");
     }
 
+    //Add the string1 setting so the String hash can't cache the hash result, giving a more even comparison
     @Benchmark
     public void testUnsafeHash(final Blackhole blackhole) {
         string1 = stringBase + i;
