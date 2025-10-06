@@ -3,6 +3,7 @@ package offHeapDataStructures;
 import org.agrona.BitUtil;
 import org.agrona.collections.Hashing;
 import org.agrona.concurrent.UnsafeBuffer;
+import org.agrona.generation.DoNotSub;
 import slab.BufferUtils;
 import slab.Codec;
 
@@ -13,6 +14,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import static java.util.Objects.requireNonNull;
+
 public class BytesToIntOffHeapMap<T extends Codec> implements Map<T, Integer> {
 
     private final UnsafeBuffer buffer;
@@ -20,13 +23,11 @@ public class BytesToIntOffHeapMap<T extends Codec> implements Map<T, Integer> {
     private final float loadFactor;
     private final int singleEntrySize;
 
-    private final T reusableCodec;
     private final short codecSize;
 
     private int capacity;
-    private int mask;
-    private int nextResizeLimit;
-    private int size;
+    @DoNotSub private int nextResizeLimit;
+    @DoNotSub private int size;
 
     private static final int OCCUPIED_MARKER_SIZE = 1;
     private static final int INT_SIZE = 4;
@@ -44,12 +45,11 @@ public class BytesToIntOffHeapMap<T extends Codec> implements Map<T, Integer> {
     public BytesToIntOffHeapMap(final int capacity, final float loadFactor, final Supplier<T> codecSupplier) {
         final int updatedCapacity = BitUtil.findNextPositivePowerOfTwo(capacity);
         this.capacity = updatedCapacity;
-        this.mask = this.capacity - 1;
         this.loadFactor = loadFactor;
         this.nextResizeLimit = (int) (updatedCapacity * loadFactor);
 
-        this.reusableCodec = codecSupplier.get();
-        this.codecSize = reusableCodec.bufferSize();
+        final var tempCodec = codecSupplier.get();
+        this.codecSize = tempCodec.bufferSize();
         this.singleEntrySize = OCCUPIED_MARKER_SIZE + INT_SIZE + codecSize;
         this.buffer = new UnsafeBuffer(ByteBuffer.allocateDirect(singleEntrySize * updatedCapacity));
     }
@@ -95,8 +95,9 @@ public class BytesToIntOffHeapMap<T extends Codec> implements Map<T, Integer> {
     }
 
     public int getInt(final T codec) {
-        final int hashCode = codec.hashCode();
-        int index = Hashing.hash(hashCode, mask);
+        requireNonNull(codec);
+        @DoNotSub final int mask = this.capacity - 1;
+        @DoNotSub int index = Hashing.hash(codec, mask);
         int offset = index * singleEntrySize;
         while (buffer.getByte(offset) != 0) {
             tempBuffer.wrap(buffer, offset + OCCUPIED_MARKER_SIZE, codecSize);
@@ -111,17 +112,17 @@ public class BytesToIntOffHeapMap<T extends Codec> implements Map<T, Integer> {
 
     @Override
     public Integer put(T key, Integer value) {
-        return 0;
+        return putValue(key, value);
     }
 
     //Try to optimize this through byte alignment
-    public int put(final T codec, final int value) {
-        final int hashCode = codec.hashCode();
-        int index = Hashing.hash(hashCode, mask);
+    public int putValue(final T codec, final int value) {
+        requireNonNull(codec);
+        @DoNotSub final int mask = capacity - 1;
+        @DoNotSub int index = Hashing.hash(codec, mask);
         int offset = index * singleEntrySize;
         while (buffer.getByte(offset) != 0) {
-            tempBuffer.wrap(buffer, offset + OCCUPIED_MARKER_SIZE, codecSize);
-            if (tempBuffer.compareTo(codec.buffer()) == 0) {
+            if (BufferUtils.bufferEquals(codec.buffer(), buffer, offset + OCCUPIED_MARKER_SIZE, codecSize)) {
                 final int oldValue = buffer.getInt(offset + OCCUPIED_MARKER_SIZE + codecSize);
                 buffer.putInt(offset + OCCUPIED_MARKER_SIZE + codecSize, value);
                 return oldValue;
@@ -147,15 +148,16 @@ public class BytesToIntOffHeapMap<T extends Codec> implements Map<T, Integer> {
     }
 
     public int removeKey(final T codec) {
-        int index = Hashing.hash(codec.hashCode(), mask);
+        requireNonNull(codec);
+        @DoNotSub final int mask = this.capacity - 1;
+        @DoNotSub int index = Hashing.hash(codec, mask);
         int offset = index * singleEntrySize;
         while (buffer.getByte(offset) != 0) {
-            tempBuffer.wrap(buffer, offset + OCCUPIED_MARKER_SIZE, codecSize);
-            if (tempBuffer.compareTo(codec.buffer()) == 0) {
+            if (BufferUtils.bufferEquals(codec.buffer(), buffer, offset + OCCUPIED_MARKER_SIZE, codecSize)) {
                 //mark empty
                 buffer.putByte(offset, (byte) 0);
                 size--;
-                tryCompact();
+                tryCompact(index);
                 return buffer.getInt(offset + OCCUPIED_MARKER_SIZE + codecSize);
             }
             index = ++index & mask;
@@ -193,17 +195,20 @@ public class BytesToIntOffHeapMap<T extends Codec> implements Map<T, Integer> {
     }
 
     private void tryIncreaseCapacity() {
-        if (size <= nextResizeLimit) {
-            return;
+        if (size > nextResizeLimit) {
+            rehash();
         }
+    }
+
+    private void rehash() {
         final int oldCapacity = this.capacity;
         this.capacity <<= 1;
-        this.mask = capacity - 1;
+        @DoNotSub final int mask = capacity - 1;
         this.nextResizeLimit = (int) (this.capacity * loadFactor);
 
         final UnsafeBuffer newBuffer = new UnsafeBuffer(ByteBuffer.allocateDirect(capacity * singleEntrySize));
         int offset = 0;
-        for (int i = 0; i < oldCapacity; i++) {
+        for (@DoNotSub int i = 0; i < oldCapacity; i++) {
             if (buffer.getByte(offset) != 0) {
                 tempBuffer.wrap(buffer, offset + OCCUPIED_MARKER_SIZE, codecSize);
                 int index = Hashing.hash(tempBuffer.hashCode(), mask);
@@ -224,7 +229,33 @@ public class BytesToIntOffHeapMap<T extends Codec> implements Map<T, Integer> {
         this.buffer.wrap(newBuffer, 0, newBuffer.capacity());
     }
 
-    private void tryCompact() {
+    private void tryCompact(int deleteIndex) {
+        @DoNotSub final int mask = capacity - 1;
+        @DoNotSub int index = deleteIndex;
 
+        while (true) {
+            index = ++index & mask;
+            final int offset = index * singleEntrySize;
+
+            if (buffer.getByte(offset) == 0) {
+                return;
+            }
+
+            @DoNotSub final int hash = Hashing.hash(BufferUtils.segmentHashCode(buffer, offset + OCCUPIED_MARKER_SIZE, codecSize), mask);
+
+            if ((index < hash && (hash <= deleteIndex || deleteIndex <= index)) ||
+                    (hash <= deleteIndex && deleteIndex <= index)) {
+                final int deleteOffset = deleteIndex * singleEntrySize;
+
+                buffer.putByte(deleteOffset, (byte) 1);
+                buffer.putBytes(deleteOffset + OCCUPIED_MARKER_SIZE, buffer,
+                        offset + OCCUPIED_MARKER_SIZE, codecSize);
+                buffer.putInt(deleteOffset + OCCUPIED_MARKER_SIZE + codecSize,
+                        buffer.getInt(offset + OCCUPIED_MARKER_SIZE + codecSize));
+
+                buffer.putByte(offset, (byte) 0);
+                deleteIndex = index;
+            }
+        }
     }
 }

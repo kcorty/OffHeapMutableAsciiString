@@ -4,15 +4,16 @@ import lombok.Getter;
 import org.agrona.DirectBuffer;
 import org.agrona.MutableDirectBuffer;
 import org.agrona.concurrent.UnsafeBuffer;
+import slab.BufferUtils;
+import slab.Codec;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.InputMismatchException;
 
-public class UnsafeAsciiString implements CharSequence {
+public class UnsafeAsciiString implements CharSequence, Codec {
     @Getter
     private final MutableDirectBuffer buffer;
-
 
     public UnsafeAsciiString(final int size) {
         if ((size & 7) != 0) {
@@ -169,5 +170,20 @@ public class UnsafeAsciiString implements CharSequence {
             length++;
         }
         return length;
+    }
+
+    @Override
+    public short bufferSize() {
+        return (short) this.buffer.capacity();
+    }
+
+    @Override
+    public void wrap(final MutableDirectBuffer buffer, final int offset, final int length) {
+        this.buffer.wrap(buffer, offset, length);
+    }
+
+    @Override
+    public DirectBuffer buffer() {
+        return this.buffer;
     }
 }

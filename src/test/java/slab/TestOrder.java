@@ -1,5 +1,6 @@
 package slab;
 
+import offHeapMutableAsciiString.UnsafeAsciiString;
 import org.agrona.DirectBuffer;
 import org.agrona.MutableDirectBuffer;
 import org.agrona.concurrent.UnsafeBuffer;
