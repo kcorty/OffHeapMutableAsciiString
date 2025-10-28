@@ -11,9 +11,9 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
-@Fork(1)
+@Fork(3)
 @Warmup(iterations = 2, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 5, time = 2000, timeUnit = TimeUnit.MILLISECONDS)
 public class DataStoreTests {
 
     private final ArrayDeque<ConcreteTestOrder> concreteTestOrdersPool = new ArrayDeque<>(2048);
