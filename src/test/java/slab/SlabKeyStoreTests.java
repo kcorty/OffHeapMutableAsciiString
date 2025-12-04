@@ -2,7 +2,11 @@ package slab;
 
 import offHeapMutableAsciiString.UnsafeAsciiString;
 import org.agrona.collections.Object2ObjectHashMap;
+import org.agrona.concurrent.UnsafeBuffer;
 import org.junit.jupiter.api.Test;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -45,9 +49,12 @@ public class SlabKeyStoreTests {
     public void loopingCreateThenRemoveTest() {
         final TestOrder testOrder = new TestOrder();
         final TestOrder testOrder2 = new TestOrder();
+        final UnsafeBuffer unsafeBuffer = new UnsafeBuffer(ByteBuffer.allocateDirect(40)
+                .order(ByteOrder.LITTLE_ENDIAN));
+        testOrder2.wrap(unsafeBuffer, 0, 40);
         final Slab<TestOrder> slab = new Slab<>((short) 64, 2 << 15, () -> new TestOrder());
 
-        final SlabKeyStore<TestOrder> slabKeyStore = new SlabKeyStore<>(2 << 21, 0.65f, slab);
+        final SlabKeyStore<TestOrder> slabKeyStore = new SlabKeyStore<>(2 << 22, 0.65f, slab);
 
         for (int i = 0; i < 2000000; i++) {
             final int index = slab.create(testOrder);
@@ -66,7 +73,7 @@ public class SlabKeyStoreTests {
     @Test
     public void heapLoopingCreateThenRemoveTest() {
         final Object2ObjectHashMap<UnsafeAsciiString, ConcreteTestOrder> heapMap = new Object2ObjectHashMap<>(
-                2 << 21, 0.65f);
+                2 << 22, 0.65f);
 
         for (int i = 0; i < 2000000; i++) {
             final ConcreteTestOrder concreteTestOrder = new ConcreteTestOrder();
@@ -85,6 +92,9 @@ public class SlabKeyStoreTests {
     public void insertionTesting() {
         final TestOrder testOrder = new TestOrder();
         final TestOrder testOrder2 = new TestOrder();
+        final UnsafeBuffer unsafeBuffer = new UnsafeBuffer(ByteBuffer.allocateDirect(40)
+                .order(ByteOrder.LITTLE_ENDIAN));
+        testOrder2.wrap(unsafeBuffer, 0, 40);
         final UnsafeAsciiString unsafeAsciiString = new UnsafeAsciiString(TestOrder.ASCII_LENGTH);
         final Slab<TestOrder> slab = new Slab<>((short) 64, 4, () -> new TestOrder());
         final SlabKeyStore<TestOrder> slabKeyStore = new SlabKeyStore<>(8, 0.65f, slab);

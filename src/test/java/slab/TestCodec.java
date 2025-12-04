@@ -1,6 +1,5 @@
 package slab;
 
-import org.agrona.DirectBuffer;
 import org.agrona.MutableDirectBuffer;
 import org.agrona.concurrent.UnsafeBuffer;
 
@@ -20,13 +19,8 @@ public class TestCodec implements Codec {
     }
 
     @Override
-    public DirectBuffer buffer() {
+    public MutableDirectBuffer buffer() {
         return buffer;
-    }
-
-    @Override
-    public int keyHashCode() {
-        return buffer.hashCode();
     }
 
     @Override

@@ -184,13 +184,8 @@ public class UnsafeAsciiString implements CharSequence, Codec {
     }
 
     @Override
-    public DirectBuffer buffer() {
+    public MutableDirectBuffer buffer() {
         return this.buffer;
-    }
-
-    @Override
-    public int keyHashCode() {
-        return hashCode();
     }
 
     @Override

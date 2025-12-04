@@ -1,7 +1,6 @@
 package slab;
 
 import offHeapMutableAsciiString.UnsafeAsciiString;
-import org.agrona.DirectBuffer;
 import org.agrona.MutableDirectBuffer;
 import org.agrona.concurrent.UnsafeBuffer;
 
@@ -25,13 +24,8 @@ public class TestOrder implements Codec {
     }
 
     @Override
-    public DirectBuffer buffer() {
+    public MutableDirectBuffer buffer() {
         return buffer;
-    }
-
-    @Override
-    public int keyHashCode() {
-        return BufferUtils.segmentHashCodeShortCircuiting(this.buffer, ASCII_OFFSET, ASCII_LENGTH);
     }
 
     @Override

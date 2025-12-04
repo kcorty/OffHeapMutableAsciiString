@@ -1,6 +1,5 @@
 package slab;
 
-import org.agrona.DirectBuffer;
 import org.agrona.MutableDirectBuffer;
 
 public interface Codec extends CodecKeyHashGenerator {
@@ -9,9 +8,11 @@ public interface Codec extends CodecKeyHashGenerator {
 
     void wrap(final MutableDirectBuffer buffer, final int offset, final int length);
 
-    DirectBuffer buffer();
+    MutableDirectBuffer buffer();
 
-    int keyHashCode();
+    default int keyHashCode() {
+        return generateKeyHashCode(buffer(), 0);
+    }
 
     int keyOffset();
 

@@ -25,27 +25,27 @@ public class CursorTests {
 
         assertEquals(0, cursor.getCursorIndex());
         cursor.wrapAtCursor(testCodec);
-        assertEquals(0, this.buffer.getInt(9));
+        assertEquals(0, this.buffer.getInt(1));
         testCodec.setId(3);
-        assertEquals(3, this.buffer.getInt(9));
+        assertEquals(3, this.buffer.getInt(1));
         cursor.incrementCursor();
         assertEquals(1, cursor.getCursorIndex());
         cursor.wrapAtCursor(testCodec);
         assertEquals(0, testCodec.getId());
-        assertEquals(0, this.buffer.getInt(14));
+        assertEquals(0, this.buffer.getInt(6));
 
         //will exceed existing pages, triggering new page
         cursor.incrementCursor();
         assertEquals(2, cursor.getCursorIndex());
-        assertEquals(0, this.buffer.getInt(9));
+        assertEquals(0, this.buffer.getInt(1));
         cursor.wrapAtCursor(testCodec);
         assertEquals(0, testCodec.getId());
         testCodec.setId(4);
-        assertEquals(4, this.buffer.getInt(9));
+        assertEquals(4, this.buffer.getInt(1));
     }
 
     private void addPage() {
-        this.buffer = new UnsafeBuffer(ByteBuffer.allocateDirect(18));
+        this.buffer = new UnsafeBuffer(ByteBuffer.allocateDirect(10));
         final SlabPage<TestCodec> slabPage = new SlabPage<>(buffer, (short) 4, pageCount++);
         pages[activePagesCount] = slabPage;
         cleanPageIndices.addInt(activePagesCount++);

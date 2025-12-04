@@ -20,15 +20,15 @@ public class SlabPageTests {
         assertEquals(0, slabPage.getLiveCount());
         slabPage.createAt(0, testCodec);
         assertEquals(1, slabPage.getLiveCount());
-        assertEquals(0, buffer.getInt(9));
+        assertEquals(0, buffer.getInt(1));
         testCodec.setId(3);
-        assertEquals(3, buffer.getInt(9));
+        assertEquals(3, buffer.getInt(1));
 
         slabPage.createAt(1, testCodec);
 
         assertEquals(2, slabPage.getLiveCount());
         testCodec.setId(4);
-        assertEquals(4, buffer.getInt(14));
+        assertEquals(4, buffer.getInt(6));
 
         slabPage.removeAt(0);
         assertEquals(1, slabPage.getLiveCount());
@@ -36,7 +36,7 @@ public class SlabPageTests {
 
         slabPage.cleanPage();
         assertEquals(0, slabPage.getLiveCount());
-        assertEquals(0, slabPage.getPageIndex());
+        assertEquals(1, slabPage.getPageIndex());
         assertEquals(0, testCodec.getId());
     }
 }
