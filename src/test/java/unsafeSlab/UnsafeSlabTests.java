@@ -48,10 +48,10 @@ public class UnsafeSlabTests {
 
     @Test
     public void slabRemoveTest() {
-        final UnsafeSlab<UnsafeTestOrder> slab = new UnsafeSlab<>((short) 256, 4096, () -> new UnsafeTestOrder());
+        final UnsafeSlab<UnsafeTestOrder> slab = new UnsafeSlab<>((short) 256, 4, () -> new UnsafeTestOrder());
 
         final UnsafeTestOrder testCodec = new UnsafeTestOrder();
-        final int iterations = 256 * 4096 * 16;
+        final int iterations = 256 * 4096 * 64;
         for (int i = 0; i < iterations; i++) {
             final int index = slab.create(testCodec);
             slab.removeAt(index);

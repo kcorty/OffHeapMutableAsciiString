@@ -1,10 +1,18 @@
 package unsafeSlab;
 
-public interface UnsafeCodec {
+import utils.UnsafeBufferUtils;
+
+public interface UnsafeCodec extends UnsafeCodecKeyHashGenerator {
 
     short bufferSize();
 
+    long memOffset();
+
     void wrap(final long memOffset);
+
+    default int keyHashCode() {
+        return generateKeyHashCode(memOffset());
+    }
 
     int keyOffset();
 

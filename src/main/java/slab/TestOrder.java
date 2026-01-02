@@ -1,12 +1,13 @@
 package slab;
 
-import offHeapMutableAsciiString.UnsafeAsciiString;
+import offHeapTypes.DirectBufferUnsafeString;
 import org.agrona.MutableDirectBuffer;
 import org.agrona.concurrent.UnsafeBuffer;
+import utils.DirectBufferUtils;
 
 public class TestOrder implements Codec {
 
-    protected final UnsafeAsciiString unsafeAsciiString = new UnsafeAsciiString();
+    protected final DirectBufferUnsafeString directBufferUnsafeString = new DirectBufferUnsafeString();
 
     private final MutableDirectBuffer buffer = new UnsafeBuffer();
 
@@ -30,7 +31,7 @@ public class TestOrder implements Codec {
 
     @Override
     public int generateKeyHashCode(final MutableDirectBuffer buffer, final int offset) {
-        return BufferUtils.segmentHashCodeShortCircuiting(buffer, offset + ASCII_OFFSET, ASCII_LENGTH);
+        return DirectBufferUtils.segmentHashCodeShortCircuiting(buffer, offset + ASCII_OFFSET, ASCII_LENGTH);
     }
 
     @Override
@@ -43,9 +44,9 @@ public class TestOrder implements Codec {
         return ASCII_LENGTH;
     }
 
-    public UnsafeAsciiString getUnsafeAsciiString() {
-        unsafeAsciiString.wrap(this.buffer, ASCII_OFFSET, ASCII_LENGTH);
-        return unsafeAsciiString;
+    public DirectBufferUnsafeString getUnsafeAsciiString() {
+        directBufferUnsafeString.wrap(this.buffer, ASCII_OFFSET, ASCII_LENGTH);
+        return directBufferUnsafeString;
     }
 
 }

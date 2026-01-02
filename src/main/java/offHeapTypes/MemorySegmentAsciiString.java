@@ -1,4 +1,4 @@
-package offHeapMutableAsciiString;
+package offHeapTypes;
 
 import jdk.incubator.vector.LongVector;
 import jdk.incubator.vector.VectorSpecies;

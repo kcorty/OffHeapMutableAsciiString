@@ -36,8 +36,8 @@ public class UnsafeSlabPage<T extends UnsafeCodec> {
     public int removeAt(final int index) {
         final long pageOffset = getOffset(index);
         if (UnsafeApi.getByte(pageOffset) != 0) {
-            liveCounter--;
             UnsafeApi.putByte(pageOffset, (byte) 0);
+            return --liveCounter;
         }
         return liveCounter;
     }

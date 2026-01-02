@@ -1,11 +1,8 @@
 package slab;
 
 import org.agrona.DirectBuffer;
-import org.agrona.MutableDirectBuffer;
 import org.agrona.concurrent.UnsafeBuffer;
-
-import java.util.function.BiConsumer;
-import java.util.function.ObjIntConsumer;
+import utils.DirectBufferUtils;
 
 public class SlabPage<T extends Codec> {
 
@@ -39,7 +36,7 @@ public class SlabPage<T extends Codec> {
     public boolean equalsUnderlying(final int index, final int inCodecOffset, final int compareSize,
                                  final DirectBuffer otherBuffer, final int otherOffset) {
         final int codecOffset = getOffset(index) + SLAB_PAGE_LIVE_PADDING_SIZE;
-        return BufferUtils.bufferEquals(pageBuffer, codecOffset + inCodecOffset,
+        return DirectBufferUtils.bufferEquals(pageBuffer, codecOffset + inCodecOffset,
                 otherBuffer, otherOffset, compareSize);
     }
 
@@ -59,7 +56,7 @@ public class SlabPage<T extends Codec> {
 
     protected void cleanPage() {
         liveCounter = 0;
-        BufferUtils.resetBuffer(pageBuffer);
+        DirectBufferUtils.resetBuffer(pageBuffer);
     }
 
     public int getPageIndex() {

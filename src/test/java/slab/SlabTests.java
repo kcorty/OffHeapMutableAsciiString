@@ -49,10 +49,10 @@ public class SlabTests {
 
     @Test
     public void slabRemoveTest() {
-        final Slab<TestOrder> slab = new Slab<>((short) 256, 4096, () -> new TestOrder());
+        final Slab<TestOrder> slab = new Slab<>((short) 256, 4, () -> new TestOrder());
 
         final TestOrder testCodec = new TestOrder();
-        final int iterations = 256 * 4096 * 16;
+        final int iterations = 256 * 4096 * 64;
         for (int i = 0; i < iterations; i++) {
             final int index = slab.create(testCodec);
             slab.removeAt(index);

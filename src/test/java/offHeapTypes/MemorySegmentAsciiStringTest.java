@@ -1,4 +1,4 @@
-package offHeapMutableAsciiString;
+package offHeapTypes;
 
 import org.agrona.collections.Object2LongHashMap;
 import org.junit.jupiter.api.Test;

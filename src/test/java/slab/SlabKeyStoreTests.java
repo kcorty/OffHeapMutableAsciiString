@@ -1,9 +1,10 @@
 package slab;
 
-import offHeapMutableAsciiString.UnsafeAsciiString;
+import offHeapTypes.DirectBufferUnsafeString;
 import org.agrona.collections.Object2ObjectHashMap;
 import org.agrona.concurrent.UnsafeBuffer;
 import org.junit.jupiter.api.Test;
+import utils.DirectBufferUtils;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -72,7 +73,7 @@ public class SlabKeyStoreTests {
 
     @Test
     public void heapLoopingCreateThenRemoveTest() {
-        final Object2ObjectHashMap<UnsafeAsciiString, ConcreteTestOrder> heapMap = new Object2ObjectHashMap<>(
+        final Object2ObjectHashMap<DirectBufferUnsafeString, ConcreteTestOrder> heapMap = new Object2ObjectHashMap<>(
                 2 << 22, 0.65f);
 
         for (int i = 0; i < 2000000; i++) {
@@ -95,7 +96,7 @@ public class SlabKeyStoreTests {
         final UnsafeBuffer unsafeBuffer = new UnsafeBuffer(ByteBuffer.allocateDirect(40)
                 .order(ByteOrder.LITTLE_ENDIAN));
         testOrder2.wrap(unsafeBuffer, 0, 40);
-        final UnsafeAsciiString unsafeAsciiString = new UnsafeAsciiString(TestOrder.ASCII_LENGTH);
+        final DirectBufferUnsafeString directBufferUnsafeString = new DirectBufferUnsafeString(TestOrder.ASCII_LENGTH);
         final Slab<TestOrder> slab = new Slab<>((short) 64, 4, () -> new TestOrder());
         final SlabKeyStore<TestOrder> slabKeyStore = new SlabKeyStore<>(8, 0.65f, slab);
 
@@ -109,11 +110,11 @@ public class SlabKeyStoreTests {
         assertEquals(10, slabKeyStore.size());
         System.out.println(slabKeyStore.printDataStore());
         for (int i = 0; i < 10; i++) {
-            unsafeAsciiString.set(String.valueOf(i));
+            directBufferUnsafeString.set(String.valueOf(i));
             final int index = slabKeyStore.wrapFromKey(
-                    unsafeAsciiString.buffer(), 0,
-                    BufferUtils.segmentHashCodeShortCircuiting(
-                            unsafeAsciiString.buffer(), 0, TestOrder.ASCII_LENGTH));
+                    directBufferUnsafeString.buffer(), 0,
+                    DirectBufferUtils.segmentHashCodeShortCircuiting(
+                            directBufferUnsafeString.buffer(), 0, TestOrder.ASCII_LENGTH));
             assertEquals(i, index);
             testOrder2.getUnsafeAsciiString().set(String.valueOf(i));
             final int index2 = slabKeyStore.wrapFromKey(testOrder2);
@@ -134,11 +135,11 @@ public class SlabKeyStoreTests {
             System.out.println(slabKeyStore.printDataStore());
         }
         for (int i = 5; i < 10; i++) {
-            unsafeAsciiString.set(String.valueOf(i));
+            directBufferUnsafeString.set(String.valueOf(i));
             final int removedIndex = slabKeyStore.removeFromKey(
-                    unsafeAsciiString.buffer(), 0,
-                    BufferUtils.segmentHashCodeShortCircuiting(
-                            unsafeAsciiString.buffer(), 0, TestOrder.ASCII_LENGTH)
+                    directBufferUnsafeString.buffer(), 0,
+                    DirectBufferUtils.segmentHashCodeShortCircuiting(
+                            directBufferUnsafeString.buffer(), 0, TestOrder.ASCII_LENGTH)
             );
             assertEquals(i, removedIndex);
         }

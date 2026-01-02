@@ -1,5 +1,7 @@
 package unsafeSlab;
 
+import utils.UnsafeBufferUtils;
+
 public class UnsafeTestOrder implements UnsafeCodec {
 
     private long memOffset;
@@ -7,6 +9,11 @@ public class UnsafeTestOrder implements UnsafeCodec {
     @Override
     public short bufferSize() {
         return 256;
+    }
+
+    @Override
+    public long memOffset() {
+        return memOffset;
     }
 
     @Override
@@ -22,5 +29,10 @@ public class UnsafeTestOrder implements UnsafeCodec {
     @Override
     public int keyLength() {
         return 0;
+    }
+
+    @Override
+    public int generateKeyHashCode(final long codecOffset) {
+        return UnsafeBufferUtils.unsafeHashCodeShortCircuiting(codecOffset + keyOffset(), keyLength());
     }
 }

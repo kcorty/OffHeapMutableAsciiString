@@ -8,6 +8,15 @@ import unsafeSlab.UnsafeTestOrder;
 
 import java.util.concurrent.TimeUnit;
 
+//--enable-preview
+//--add-opens
+//java.base/jdk.internal.misc=ALL-UNNAMED
+//-Dagrona.disable.bounds.checks=true
+//--add-modules
+//jdk.incubator.vector
+//-XX:MaxDirectMemorySize=4g
+//-Xmx4g
+//-Xms4g
 @State(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
@@ -85,5 +94,20 @@ public class SlabBenchmarkTests {
     public void testUnsafeSlabRemove() {
         final int index = unsafeSlab.create(unsafeTestOrder);
         unsafeSlab.removeAt(index);
+    }
+
+    @Benchmark
+    public void testUnsafeIncrementalRemoves() {
+        if (intArrayQueue.size() == 1024) {
+            isDraining = true;
+        }
+        if (intArrayQueue.isEmpty()) {
+            isDraining = false;
+        }
+        if (isDraining) {
+            unsafeSlab.removeAt(intArrayQueue.poll());
+        } else {
+            intArrayQueue.addInt(unsafeSlab.create(unsafeTestOrder));
+        }
     }
 }

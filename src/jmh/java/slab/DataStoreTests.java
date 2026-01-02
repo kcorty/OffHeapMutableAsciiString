@@ -1,7 +1,7 @@
 package slab;
 
 import offHeapDataStructures.BytesToIntOffHeapMap;
-import offHeapMutableAsciiString.UnsafeAsciiString;
+import offHeapTypes.DirectBufferUnsafeString;
 import org.agrona.collections.Object2ObjectHashMap;
 import org.openjdk.jmh.annotations.*;
 
@@ -17,15 +17,15 @@ import java.util.concurrent.TimeUnit;
 public class DataStoreTests {
 
     private final ArrayDeque<ConcreteTestOrder> concreteTestOrdersPool = new ArrayDeque<>(2048);
-    private final Object2ObjectHashMap<UnsafeAsciiString, ConcreteTestOrder> heapMap = new Object2ObjectHashMap<>(
+    private final Object2ObjectHashMap<DirectBufferUnsafeString, ConcreteTestOrder> heapMap = new Object2ObjectHashMap<>(
             2048, 0.65f);
 
     private final ConcreteTestOrder concreteTestOrder = new ConcreteTestOrder();
     private final TestOrder testOrder = new TestOrder();
-    private final UnsafeAsciiString lookupKey = new UnsafeAsciiString(40);
+    private final DirectBufferUnsafeString lookupKey = new DirectBufferUnsafeString(40);
     private final Slab<TestOrder> slab = new Slab<>((short) 256, 8, () -> this.testOrder);
-    private final BytesToIntOffHeapMap<UnsafeAsciiString> offHeapMap = new BytesToIntOffHeapMap<>(2048,
-            () -> new UnsafeAsciiString(40));
+    private final BytesToIntOffHeapMap<DirectBufferUnsafeString> offHeapMap = new BytesToIntOffHeapMap<>(2048,
+            () -> new DirectBufferUnsafeString(40));
 
     private final SlabKeyStore<TestOrder> slabKeyStore = new SlabKeyStore<>(2048, 0.65f, slab);
 

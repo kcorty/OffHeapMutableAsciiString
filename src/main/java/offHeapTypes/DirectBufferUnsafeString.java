@@ -1,4 +1,4 @@
-package offHeapMutableAsciiString;
+package offHeapTypes;
 
 import lombok.Getter;
 import org.agrona.DirectBuffer;
@@ -10,24 +10,24 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.InputMismatchException;
 
-import static slab.BufferUtils.segmentHashCodeShortCircuiting;
+import static utils.DirectBufferUtils.segmentHashCodeShortCircuiting;
 
-public class UnsafeAsciiString implements CharSequence, Codec {
+public class DirectBufferUnsafeString implements CharSequence, Codec {
     @Getter
     private final MutableDirectBuffer buffer;
 
-    public UnsafeAsciiString() {
+    public DirectBufferUnsafeString() {
         this.buffer = new UnsafeBuffer();
     }
 
-    public UnsafeAsciiString(final int size) {
+    public DirectBufferUnsafeString(final int size) {
         if ((size & 7) != 0) {
             throw new InputMismatchException("Buffer size must be word aligned to 8 bytes!");
         }
         this.buffer = new UnsafeBuffer(ByteBuffer.allocateDirect(size).order(ByteOrder.LITTLE_ENDIAN));
     }
 
-    public UnsafeAsciiString(final DirectBuffer otherBuffer, final int offset, final int size) {
+    public DirectBufferUnsafeString(final DirectBuffer otherBuffer, final int offset, final int size) {
         if ((size & 7) != 0) {
             throw new InputMismatchException("Buffer size must be word aligned to 8 bytes!");
         }
@@ -52,7 +52,7 @@ public class UnsafeAsciiString implements CharSequence, Codec {
         padRemainder(charSequence.length());
     }
 
-    public void set(final UnsafeAsciiString otherBuffer) {
+    public void set(final DirectBufferUnsafeString otherBuffer) {
         if (otherBuffer.buffer.capacity() > this.buffer.capacity()) {
             throw new IndexOutOfBoundsException("Buffer too long!");
         }
@@ -72,8 +72,8 @@ public class UnsafeAsciiString implements CharSequence, Codec {
     }
 
     @Override
-    public UnsafeAsciiString clone() {
-        final UnsafeAsciiString clone = new UnsafeAsciiString(this.buffer.capacity());
+    public DirectBufferUnsafeString clone() {
+        final DirectBufferUnsafeString clone = new DirectBufferUnsafeString(this.buffer.capacity());
         clone.set(this);
         return clone;
     }
@@ -88,7 +88,7 @@ public class UnsafeAsciiString implements CharSequence, Codec {
         if (this == object) {
             return true;
         }
-        if (object instanceof final UnsafeAsciiString other) {
+        if (object instanceof final DirectBufferUnsafeString other) {
             if (this.buffer.capacity() == other.buffer.capacity()) {
                 return this.buffer.compareTo(other.buffer) == 0;
             }
@@ -105,7 +105,7 @@ public class UnsafeAsciiString implements CharSequence, Codec {
     }
 
     //TODO: Explore whether backwards heuristic is quicker
-    public static boolean unsafeEquals(final UnsafeAsciiString a, final UnsafeAsciiString b) {
+    public static boolean unsafeEquals(final DirectBufferUnsafeString a, final DirectBufferUnsafeString b) {
         for (int i = 0; i + 8 <= a.buffer.capacity(); i += 8) {
             if (a.buffer.getLong(i) != b.buffer.getLong(i)) {
                 return false;

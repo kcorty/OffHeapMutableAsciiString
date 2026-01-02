@@ -1,4 +1,4 @@
-package offHeapMutableAsciiString;
+package offHeapTypes;
 
 public class CharSequenceUtils {
 

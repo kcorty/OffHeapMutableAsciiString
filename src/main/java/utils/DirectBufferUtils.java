@@ -1,9 +1,9 @@
-package slab;
+package utils;
 
 import org.agrona.DirectBuffer;
 import org.agrona.MutableDirectBuffer;
 
-public class BufferUtils {
+public class DirectBufferUtils {
 
     public static void resetBuffer(final MutableDirectBuffer buffer) {
         buffer.setMemory(0, buffer.capacity(), (byte) 0);

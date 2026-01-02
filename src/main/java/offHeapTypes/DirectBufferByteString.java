@@ -1,4 +1,4 @@
-package offHeapMutableAsciiString;
+package offHeapTypes;
 
 import org.agrona.MutableDirectBuffer;
 import org.agrona.concurrent.UnsafeBuffer;
@@ -6,11 +6,11 @@ import org.agrona.concurrent.UnsafeBuffer;
 import java.util.Arrays;
 import java.util.InputMismatchException;
 
-public class UnsafeByteString {
+public class DirectBufferByteString {
 
     private final MutableDirectBuffer buffer;
 
-    public UnsafeByteString(final int size) {
+    public DirectBufferByteString(final int size) {
         if ((size & 7) != 0) {
             throw new InputMismatchException("Buffer size must be word aligned to 8 bytes!");
         }
@@ -35,7 +35,6 @@ public class UnsafeByteString {
     public int hashCode() {
         return Arrays.hashCode(buffer.byteArray());
     }
-
 
     public void padRemainder(final int beginOffset) {
         final int length = this.buffer.capacity();

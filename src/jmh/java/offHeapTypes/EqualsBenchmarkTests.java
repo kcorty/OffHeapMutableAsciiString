@@ -1,4 +1,4 @@
-package offHeapMutableAsciiString;
+package offHeapTypes;
 
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
@@ -12,11 +12,11 @@ import java.util.concurrent.TimeUnit;
 @Measurement(iterations = 5)
 @Fork(1)
 public class EqualsBenchmarkTests {
-    final UnsafeAsciiString unsafeAsciiString1 = new UnsafeAsciiString(40);
+    final DirectBufferUnsafeString directBufferUnsafeString1 = new DirectBufferUnsafeString(40);
 
-    final UnsafeAsciiString unsafeAsciiString2 = new UnsafeAsciiString(40);
+    final DirectBufferUnsafeString directBufferUnsafeString2 = new DirectBufferUnsafeString(40);
 
-    final UnsafeAsciiString unsafeAsciiString3 = new UnsafeAsciiString(48);
+    final DirectBufferUnsafeString directBufferUnsafeString3 = new DirectBufferUnsafeString(48);
 
     final MemorySegmentAsciiString segment1 = new MemorySegmentAsciiString(40);
     final MemorySegmentAsciiString segment2 = new MemorySegmentAsciiString(40);
@@ -26,9 +26,9 @@ public class EqualsBenchmarkTests {
 
     @Setup(Level.Trial)
     public void setup() {
-        unsafeAsciiString1.set("ABCDEFGHIJKLMNOPQRSTUVQXYZ1234567891");
-        unsafeAsciiString2.set("ABCDEFGHIJKLMNOPQRSTUVQXYZ1234567892");
-        unsafeAsciiString3.set("ABCDEFGHIJKLMNOPQRSTUVQXYZ1234567893");
+        directBufferUnsafeString1.set("ABCDEFGHIJKLMNOPQRSTUVQXYZ1234567891");
+        directBufferUnsafeString2.set("ABCDEFGHIJKLMNOPQRSTUVQXYZ1234567892");
+        directBufferUnsafeString3.set("ABCDEFGHIJKLMNOPQRSTUVQXYZ1234567893");
         string1 = "ABCDEFGHIJKLMNOPQRSTUVQXYZ1234567894";
         string2 = "ABCDEFGHIJKLMNOPQRSTUVQXYZ1234567895";
         segment1.set("ABCDEFGHIJKLMNOPQRSTUVQXYZ1234567896");
@@ -38,12 +38,12 @@ public class EqualsBenchmarkTests {
 
     @Benchmark
     public void testUnsafeEquals(final Blackhole blackhole) {
-        blackhole.consume(unsafeAsciiString1.equals(unsafeAsciiString2));
+        blackhole.consume(directBufferUnsafeString1.equals(directBufferUnsafeString2));
     }
 
     @Benchmark
     public void testFastEquals(final Blackhole blackhole) {
-        blackhole.consume(unsafeAsciiString1.equals(unsafeAsciiString3));
+        blackhole.consume(directBufferUnsafeString1.equals(directBufferUnsafeString3));
     }
 
     @Benchmark
